@@ -1,0 +1,6 @@
+data/
+docs/
+.github/
+.git/
+*.zip
+**/__pycache__

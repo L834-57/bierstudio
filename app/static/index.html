@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bierstudio</title>
+<meta name="description" content="Gemeinsam oder allein Bier verkosten und bewerten.">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f0e0c" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bierstudio">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <span class="brand"><img src="/icons/icon.svg" alt="" width="26" height="26">Bierstudio</span>
+    <span id="net" class="net" hidden></span>
+    <button id="me" class="avatar-btn" data-act="pickUser" aria-label="Person wählen"></button>
+  </div>
+</header>
+<main id="main" tabindex="-1"><div class="loading">Lade …</div></main>
+<nav class="tabbar" aria-label="Hauptnavigation">
+  <button data-act="tab" data-v="abend" id="t-abend"><svg viewBox="0 0 24 24"><path d="M7 3h10l-1 16a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2L7 3Z"/><path d="M7.3 8h9.4"/></svg><span>Abend</span></button>
+  <button data-act="tab" data-v="buch" id="t-buch"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5Z"/><path d="M4 21a2 2 0 0 1 2-2h13v2H6M9 7h6"/></svg><span>Bierbuch</span></button>
+  <button data-act="add" class="fab" aria-label="Bier eintragen"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button data-act="tab" data-v="stats" id="t-stats"><svg viewBox="0 0 24 24"><path d="M5 20v-7h3v7M11 20V5h3v15M17 20V9h3v11"/></svg><span>Statistik</span></button>
+  <button data-act="tab" data-v="mehr" id="t-mehr"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg><span>Mehr</span></button>
+</nav>
+<dialog id="sheet" aria-labelledby="sheet-title"><div class="grab" aria-hidden="true"></div><div id="sheet-body"></div></dialog>
+<dialog id="ask"><div id="ask-body"></div></dialog>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="/vendor/qrcode.js" defer></script>
+<script src="/app.js" defer></script>
+</body>
+</html>

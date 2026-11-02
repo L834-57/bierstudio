@@ -1,0 +1,87 @@
+# Bierstudio-Katalog – Quelle für app/static/catalog.json
+# Spalten durch TAB getrennt. Alkohol mit Punkt (5.2), leer = unbekannt. Website ohne https://.
+# Umwandeln:  python3 tools/build_catalog.py
+# name	aliases (|)	brewery	style	abv	country	website
+Augustiner Lagerbier Hell	Augustiner|Augustiner Hell|Augustiner Helles	Augustiner-Bräu Wagner	Helles	5.2	DE	augustiner-braeu.de
+Augustiner Edelstoff	Edelstoff	Augustiner-Bräu Wagner	Export	5.6	DE	augustiner-braeu.de
+Augustiner Pils		Augustiner-Bräu Wagner	Pils	5.6	DE	augustiner-braeu.de
+Rothaus Pils Tannenzäpfle	Tannenzäpfle|Zäpfle|Rothaus Pils|Rothaus	Badische Staatsbrauerei Rothaus	Pils	5.1	DE	rothaus.de
+Rothaus Hefeweizen	Rothaus Weizen	Badische Staatsbrauerei Rothaus	Weizen	5.4	DE	rothaus.de
+Krombacher Pils	Krombacher	Krombacher Brauerei	Pils	4.8	DE	krombacher.de
+Krombacher Weizen		Krombacher Brauerei	Weizen	5.3	DE	krombacher.de
+Krombacher 0,0 % Pils	Krombacher Alkoholfrei	Krombacher Brauerei	Alkoholfrei	0	DE	krombacher.de
+Bitburger Premium Pils	Bitburger|Bit	Bitburger Brauerei	Pils	4.8	DE	bitburger.de
+Bitburger 0,0 %	Bitburger Alkoholfrei	Bitburger Brauerei	Alkoholfrei	0	DE	bitburger.de
+Warsteiner Premium Pilsener	Warsteiner|Warsteiner Pils	Warsteiner Brauerei Haus Cramer	Pils	4.8	DE	warsteiner.de
+Veltins Pilsener	Veltins|Veltins Pils	Brauerei C. & A. Veltins	Pils	4.8	DE	veltins.de
+Beck's Pils	Becks|Beck's	Brauerei Beck	Pils	4.9	DE	becks.de
+Jever Pilsener	Jever|Jever Pils	Friesisches Brauhaus zu Jever	Pils	4.9	DE	jever.de
+Flensburger Pilsener	Flensburger|Flens|Flensburger Pils	Flensburger Brauerei	Pils	4.8	DE	flens.de
+Radeberger Pilsner	Radeberger|Radeberger Pils	Radeberger Exportbierbrauerei	Pils	4.8	DE	radeberger.de
+Hasseröder Premium Pils	Hasseröder	Hasseröder Brauerei	Pils	4.9	DE	hasseroeder.de
+Holsten Pilsener	Holsten|Holsten Pils	Holsten-Brauerei	Pils	4.8	DE	holsten-pilsener.de
+König Pilsener	König|König Pils	König-Brauerei	Pils	4.9	DE	koenig.de
+Wernesgrüner Pils Legende	Wernesgrüner	Wernesgrüner Brauerei	Pils	4.9	DE	wernesgruener.de
+Ur-Krostitzer Feinherbes Pilsner	Ur-Krostitzer|Krostitzer	Krostitzer Brauerei	Pils	4.9	DE	ur-krostitzer.de
+Störtebeker Pilsener-Bier	Störtebeker Pils|Störtebecker Pils|Störtebeker	Störtebeker Braumanufaktur	Pils	4.9	DE	stoertebeker.com
+Oettinger Pils	Oettinger	Oettinger Brauerei	Pils	4.7	DE	
+Sternburg Export	Sterni|Sternburg	Sternburg Brauerei	Export	5.1	DE	sternburg-bier.de
+Sternburg Pilsener	Sterni Pils|Sternburg Pils	Sternburg Brauerei	Pils	4.9	DE	sternburg-bier.de
+Kulmbacher Edelherb Premium Pils	Kulmbacher Edelherb|Edelherb|Kulmbacher	Kulmbacher Brauerei	Pils	4.9	DE	kulmbacher.de
+Mönchshof Kellerbier	Mönchshof	Kulmbacher Brauerei	Kellerbier	5.4	DE	moenchshof.de
+Lübzer Pils	Lübzer	Mecklenburgische Brauerei Lübz	Pils	4.9	DE	luebzer.de
+Astra Urtyp	Astra	Holsten-Brauerei	Lager	4.9	DE	astra-bier.de
+Tegernseer Hell	Tegernseer	Herzoglich Bayerisches Brauhaus Tegernsee	Helles	4.8	DE	brauhaus-tegernsee.de
+Paulaner Münchner Hell	Paulaner Hell|Paulaner Original Münchner Hell	Paulaner Brauerei	Helles	4.9	DE	paulaner.de
+Paulaner Hefe-Weißbier Naturtrüb	Paulaner Weizen|Paulaner Weißbier|Paulaner Hefeweizen|Paulaner Weissbier	Paulaner Brauerei	Weizen	5.5	DE	paulaner.de
+Spaten Münchner Hell	Spaten|Spaten Hell	Spaten-Franziskaner-Bräu	Helles	5.2	DE	spatenbraeu.de
+Franziskaner Hefe-Weissbier Naturtrüb	Franziskaner|Franziskaner Weizen|Franziskaner Weissbier	Spaten-Franziskaner-Bräu	Weizen	5.0	DE	franziskaner-weissbier.de
+Hacker-Pschorr Münchner Hell	Hacker-Pschorr|Hacker Pschorr	Hacker-Pschorr Bräu	Helles	5.0	DE	hacker-pschorr.de
+Löwenbräu Original	Löwenbräu|Löwenbräu Hell	Löwenbräu	Helles	5.2	DE	loewenbraeu.de
+Hofbräu Original	Hofbräu|HB|Hofbräu Hell	Staatliches Hofbräuhaus in München	Helles	5.1	DE	hofbraeu-muenchen.de
+Erdinger Weißbier	Erdinger|Erdinger Hefe|Erdinger Weissbier	Privatbrauerei Erdinger Weißbräu	Weizen	5.3	DE	erdinger.de
+Erdinger Alkoholfrei		Privatbrauerei Erdinger Weißbräu	Alkoholfrei	0.4	DE	erdinger.de
+Erdinger Weißbier Dunkel	Erdinger Dunkel	Privatbrauerei Erdinger Weißbräu	Weizen	5.3	DE	erdinger.de
+Weihenstephaner Hefeweissbier	Weihenstephaner|Weihenstephaner Weizen	Bayerische Staatsbrauerei Weihenstephan	Weizen	5.4	DE	weihenstephaner.de
+Schneider Weisse Tap 7 Unser Original	Schneider Weisse|Schneider Tap 7	Weisses Bräuhaus G. Schneider & Sohn	Weizen	5.4	DE	schneider-weisse.de
+Maisel's Weisse Original	Maisels|Maisel's|Maisel's Weisse|Maisels Weisse	Brauerei Gebr. Maisel	Weizen	5.2	DE	maisel.com
+Benediktiner Weissbier Naturtrüb	Benediktiner	Benediktiner Weißbräu	Weizen	5.4	DE	benediktiner-weissbier.de
+Ayinger Bräuweisse	Ayinger|Ayinger Weizen	Brauerei Aying	Weizen	5.1	DE	ayinger.de
+Andechser Weissbier Hefetrüb	Andechser|Andechser Weizen	Klosterbrauerei Andechs	Weizen	5.5	DE	andechs.de
+Schöfferhofer Hefeweizen	Schöfferhofer	Binding-Brauerei	Weizen	5.0	DE	schoefferhofer.de
+Köstritzer Schwarzbier	Köstritzer	Köstritzer Schwarzbierbrauerei	Schwarzbier	4.8	DE	koestritzer.de
+Diebels Alt	Diebels	Privatbrauerei Diebels	Alt	4.9	DE	diebels.de
+Früh Kölsch	Früh	Cölner Hofbräu P. Josef Früh	Kölsch	4.8	DE	frueh.de
+Reissdorf Kölsch	Reissdorf	Privatbrauerei Heinrich Reissdorf	Kölsch	4.8	DE	reissdorf.de
+Gaffel Kölsch	Gaffel	Privatbrauerei Gaffel Becker & Co.	Kölsch	4.8	DE	gaffel.de
+Clausthaler Original	Clausthaler	Binding-Brauerei	Alkoholfrei		DE	clausthaler.de
+Bayreuther Hell	Bayreuther|Bayreuther Helles	Bayreuther Bierbrauerei	Helles	4.9	DE	bayreuther-bierbrauerei.de
+Büble Bier Edelbräu	Büble|Büble Bier	Allgäuer Brauhaus			DE	bueble-bier.de
+Chiemseer Hell	Chiemseer|Chiemseer Helles	Chiemseer Brauhaus	Helles		DE	chiemseer-brauhaus.de
+Bergmann Pils	Bergmann Pilsener	Bergmann Brauerei, Dortmund	Pils		DE	bergmann-bier.de
+Bergmann Export		Bergmann Brauerei, Dortmund	Export		DE	bergmann-bier.de
+Stiegl Goldbräu	Stiegl	Stieglbrauerei zu Salzburg	Märzen	4.9	AT	stiegl.at
+Corona Extra	Corona	Cervecería Modelo	Lager	4.5	MX	corona.com
+Heineken	Heineken Lager	Heineken	Lager	5.0	NL	heineken.com
+Carlsberg Pilsner	Carlsberg	Carlsberg	Lager	5.0	DK	carlsberg.com
+Budweiser Budvar	Budweiser|Budvar|Budweiser Budvar Original	Budějovický Budvar	Lager	5.0	CZ	budvar.cz
+Budweiser (USA)	Bud	Anheuser-Busch	Lager	5.0	US	budweiser.com
+Pilsner Urquell	Urquell	Plzeňský Prazdroj	Pils	4.4	CZ	pilsnerurquell.com
+Tyskie Gronie	Tyskie	Tyskie Browary Książęce	Lager		PL	tyskie.pl
+Kozel Premium	Kozel|Velkopopovický Kozel	Pivovar Velké Popovice	Lager	4.6	CZ	kozel.cz
+Staropramen Premium	Staropramen	Pivovary Staropramen	Lager	5.0	CZ	staropramen.com
+Stella Artois	Stella	Brouwerij Artois	Lager	5.0	BE	stellaartois.com
+Guinness Draught	Guinness	Guinness Brewery St. James's Gate	Stout	4.2	IE	guinness.com
+Desperados		Heineken	Biermischgetränk	5.9	NL	desperados.com
+Peroni Nastro Azzurro	Peroni|Nastro Azzurro	Birra Peroni	Lager	5.0	IT	peroni.com
+Estrella Damm	Estrella	S.A. Damm	Lager	5.4	ES	estrelladamm.com
+San Miguel Especial	San Miguel	Mahou San Miguel	Lager	5.4	ES	sanmiguel.com
+Asahi Super Dry	Asahi	Asahi Breweries	Lager	5.0	JP	asahibeer.co.jp
+Hoegaarden Wit Blanche	Hoegaarden	Brouwerij Hoegaarden	Witbier	4.9	BE	hoegaarden.com
+Leffe Blonde	Leffe	Abbaye de Leffe	Belgisches Blond	6.6	BE	leffe.com
+Duvel		Duvel Moortgat	Belgisches Strong Ale	8.5	BE	duvel.com
+Chimay Blau	Chimay|Chimay Bleue|Chimay Grande Réserve	Abbaye de Scourmont	Trappist	9.0	BE	chimay.com
+Westmalle Tripel	Westmalle	Brouwerij Westmalle	Tripel	9.5	BE	trappistwestmalle.be
+BrewDog Punk IPA	Punk IPA|BrewDog	BrewDog	IPA	5.4	GB	brewdog.com
+Sierra Nevada Pale Ale	Sierra Nevada	Sierra Nevada Brewing Co.	Pale Ale	5.6	US	sierranevada.com
+Lagunitas IPA	Lagunitas	Lagunitas Brewing Company	IPA	6.2	US	lagunitas.com
