@@ -2,10 +2,11 @@
 
 Nur Standardbibliothek. Alle Funktionen werfen bei Netzwerkfehlern Exceptions; der Aufrufer fängt sie ab.
 """
-import json, re, threading, time, urllib.parse, urllib.request
+import json, re, threading, time, urllib.error, urllib.parse, urllib.request
 from html.parser import HTMLParser
 
-VERSION = '2.1.0'
+VERSION = '2.1.1'
+PROJECT_URL = 'https://github.com/L834-57/bierstudio'
 WD_API = 'https://www.wikidata.org/w/api.php?'
 CACHE = {}
 BEERISH = re.compile(r'bier|beer|pils|lager|\bale\b|weizen|weiß|weiss|stout|porter|bock|kölsch|brauerei|brewery|brewed|cerveza|birra|pivo', re.I)
@@ -28,12 +29,23 @@ def style_from(text):
 
 
 def ua(contact):
-    return f'Bierstudio/{VERSION} ({contact or "self-hosted beer tasting app"})'
+    # Wikimedia verlangt eine Kontaktangabe im User-Agent – ohne E-Mail nehmen wir die Projektseite.
+    return f'Bierstudio/{VERSION} (+{PROJECT_URL}; {contact or "self-hosted"})'
+
+
+_net = threading.local()
 
 
 def http_get(url, contact, max_bytes=2_000_000, timeout=8):
-    req = urllib.request.Request(url, headers={'User-Agent': ua(contact), 'Accept-Language': 'de,en;q=0.8'})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
+    req = urllib.request.Request(url, headers={'User-Agent': ua(contact), 'Accept-Language': 'de,en;q=0.8',
+                                               'Accept': 'text/html,application/json,image/*;q=0.9,*/*;q=0.8'})
+    try:
+        r = urllib.request.urlopen(req, timeout=timeout)
+    except urllib.error.HTTPError:
+        _net.answers = getattr(_net, 'answers', 0) + 1  # Server hat geantwortet (z. B. 404) – kein Netzproblem
+        raise
+    with r:
+        _net.answers = getattr(_net, 'answers', 0) + 1
         data = r.read(max_bytes + 1)
         if len(data) > max_bytes:
             raise ValueError('Antwort zu groß')
@@ -191,17 +203,25 @@ class _Icons(HTMLParser):
             self.icons.append((prio, size, a['href']))
 
 
-def logo_from_wikidata(brewery, contact):
+def logo_from_wikidata(brewery, contact, hint=None):
+    """Logo der Brauerei von Wikimedia Commons. Ohne Logo merkt sich hint['site'] die Website aus Wikidata."""
     if not brewery:
         return None
     ids, descs = wd_search(brewery, contact, limit=5)
     ents = wd_entities(ids, contact)
     for i in ids:
         e = ents.get(i, {})
+        if not ('Q131734' in ids_of(e, 'P31') or BREWERYISH.search(descs.get(i, '') + ' ' + description(e))):
+            continue
         logos = [v for v in claims(e, 'P154') if isinstance(v, str)]
-        if logos and ('Q131734' in ids_of(e, 'P31') or BREWERYISH.search(descs.get(i, '') + ' ' + description(e))):
+        if logos:
             url = 'https://commons.wikimedia.org/wiki/Special:FilePath/' + urllib.parse.quote(logos[0].replace(' ', '_')) + '?width=160'
-            return fetch_image(url, contact)
+            try:
+                return fetch_image(url, contact)
+            except Exception:
+                pass
+        if hint is not None and not hint.get('site') and site_of(e):
+            hint['site'] = site_of(e)
     return None
 
 
@@ -209,17 +229,21 @@ def logo_from_site(site, contact):
     site = domain(site or '')
     if not site:
         return None
-    base = f'https://{site}/'
+    bases = [f'https://{site}/'] + ([f'https://www.{site}/'] if not site.startswith('www.') else [])
     cands = []
-    try:
-        html, _, final = http_get(base, contact, max_bytes=800_000)
+    for base in bases:  # viele Brauereien antworten nur unter www.
+        try:
+            html, _, final = http_get(base, contact, max_bytes=800_000)
+        except Exception:
+            continue
         p = _Icons()
         p.feed(html.decode('utf-8', 'ignore'))
         p.icons.sort(key=lambda x: (x[1] >= 64, x[0], x[1]), reverse=True)
-        cands = [urllib.parse.urljoin(final, h) for _, _, h in p.icons]
-    except Exception:
-        pass
-    cands += [base + 'apple-touch-icon.png', base + 'favicon.ico']
+        root = '{0.scheme}://{0.netloc}/'.format(urllib.parse.urlsplit(final))
+        cands = [urllib.parse.urljoin(final, h) for _, _, h in p.icons] + [root + 'apple-touch-icon.png', root + 'favicon.ico']
+        break
+    for base in bases:
+        cands += [base + 'apple-touch-icon.png', base + 'favicon.ico']
     for url in dict.fromkeys(cands):
         if not url.startswith('https://'):
             continue
@@ -248,12 +272,14 @@ def get_logo(brewery, site, contact, cache_dir):
                 m = json.loads(meta.read_text())
                 if m.get('ok') and img.exists():
                     return img.read_bytes(), m['type']
-                if time.time() - m.get('at', 0) < 7 * 86400:
-                    return None  # kürzlich erfolglos versucht
+                # Kein Logo gefunden: einen Tag Ruhe. War nur das Netz weg: schon nach 10 Minuten erneut versuchen.
+                if time.time() - m.get('at', 0) < (86400 if m.get('answered') else 600):
+                    return None
             except (ValueError, KeyError):
                 pass
-        found = None
-        for fn in (lambda: logo_from_wikidata(brewery, contact), lambda: logo_from_site(site, contact)):
+        _net.answers = 0
+        found, hint = None, {}
+        for fn in (lambda: logo_from_wikidata(brewery, contact, hint), lambda: logo_from_site(site or hint.get('site'), contact)):
             try:
                 found = fn()
             except Exception:
@@ -262,5 +288,19 @@ def get_logo(brewery, site, contact, cache_dir):
                 break
         if found:
             img.write_bytes(found[0])
-        meta.write_text(json.dumps({'ok': bool(found), 'type': found[1] if found else '', 'at': time.time()}))
+        meta.write_text(json.dumps({'ok': bool(found), 'type': found[1] if found else '', 'at': time.time(),
+                                    'answered': getattr(_net, 'answers', 0) > 0}))
         return found
+
+
+def forget_misses(cache_dir):
+    """Fehlversuche vergessen, damit alle Logos sofort neu gesucht werden."""
+    n = 0
+    for meta in cache_dir.glob('*.json'):
+        try:
+            if not json.loads(meta.read_text()).get('ok'):
+                meta.unlink()
+                n += 1
+        except (ValueError, OSError):
+            pass
+    return n

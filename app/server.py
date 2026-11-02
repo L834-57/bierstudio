@@ -14,7 +14,7 @@ import lookup
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 
-VERSION = '2.1.0'
+VERSION = '2.1.1'
 BASE = Path(__file__).resolve().parent
 STATIC = BASE / 'static'
 DATA_DIR = Path(os.environ.get('DATA_DIR', BASE.parent / 'data')).resolve()
@@ -667,10 +667,15 @@ def act_restore(q):
     return {}
 
 
+def act_logos_retry(q):
+    return {'cleared': lookup.forget_misses(LOGO_DIR) if LOGO_DIR.exists() else 0}
+
+
 ACTIONS = {'person': act_person, 'rate': act_rate, 'rating/delete': act_rating_delete, 'beer': act_beer,
            'beer/delete': act_beer_delete, 'session': act_session, 'session/beers': act_session_beers,
            'session/delete': act_session_delete, 'active': act_active, 'settings': act_settings,
-           'restore': act_restore, 'trash/restore': act_trash_restore, 'backup/restore': act_backup_restore}
+           'restore': act_restore, 'trash/restore': act_trash_restore, 'backup/restore': act_backup_restore,
+           'logos/retry': act_logos_retry}
 
 
 def csv_export(user, sid):
@@ -759,7 +764,7 @@ class Handler(BaseHTTPRequestHandler):
                     return self.send(404, {'error': 'Kein Logo'})
                 hit = lookup.get_logo(clean(q.get('b')), clean(q.get('s')), off_contact(), LOGO_DIR)
                 if not hit:
-                    return self.send(404, {'error': 'Kein Logo'}, headers={'Cache-Control': 'public, max-age=86400'})
+                    return self.send(404, {'error': 'Kein Logo'}, headers={'Cache-Control': 'public, max-age=600'})
                 return self.send(200, hit[0], hit[1], {'Cache-Control': 'public, max-age=2592000',
                                                         'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; sandbox"})
             if path == '/api/backups':

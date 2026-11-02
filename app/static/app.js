@@ -96,7 +96,7 @@ function meta(b, long = false) {
   const country = long ? countryText(b.country) : (flag(b.country) || b.country || '');
   return [b.brewery, b.style, b.abv != null && b.abv !== '' ? fmt(b.abv, 1) + ' %' : '', country].filter(Boolean).map(esc).join(' · ');
 }
-const logoUrl = b => `/api/logo?b=${encodeURIComponent(b.brewery || '')}&s=${encodeURIComponent(b.site || '')}`;
+const logoUrl = b => `/api/logo?b=${encodeURIComponent(b.brewery || '')}&s=${encodeURIComponent(b.site || '')}&v=${LS.get('bs-logo-v', 0)}`;
 /** Produktbild > Brauerei-Logo > farbiger Anfangsbuchstabe (Fallback bei Ladefehler, siehe error-Listener) */
 function thumb(b, s) {
   const t = label(b, s), fb = b?.blind ? '?' : (t[0] || '?').toUpperCase(), h = hue(t);
@@ -586,6 +586,7 @@ function renderMehr() {
   <div class="seg">${[['', 'Automatisch'], ['light', 'Hell'], ['dark', 'Dunkel']].map(([k, t]) => `<button class="${LS.get('bs-theme', '') === k ? 'on' : ''}" data-act="theme" data-v="${k}">${t}</button>`).join('')}</div>
   <div class="section-title">Produktsuche</div>
   <div class="card">${DEMO ? '<p class="small muted">Die Online-Suche bei Open Food Facts gibt es nur in der selbst gehosteten Version.</p>' : D.off ? '<p class="small">✓ Weltweite Suche über Wikidata und Open Food Facts ist aktiv, inklusive Barcode.</p>' : `<p class="small muted">Die weltweite Suche nach Namen (Wikidata) funktioniert sofort. Für Open Food Facts und die Barcode-Suche braucht es eine Kontakt-E-Mail, die nur an diese Dienste übermittelt wird.</p><label class="lbl" for="off-mail">Kontakt-E-Mail</label><input class="field" id="off-mail" type="email" autocomplete="email" placeholder="du@example.de"><button class="btn block" style="margin-top:10px" data-act="offContact">Speichern</button>`}
+  ${DEMO ? '' : '<button class="btn block" style="margin-top:10px" data-act="logosRetry">Logos erneut suchen</button><p class="tiny muted" style="margin-top:6px">Logos erscheinen bei Bieren mit eingetragener Brauerei. Fehlt die, hilft „Infos ergänzen“ im Bierbuch.</p>'}
   <p class="tiny muted" style="margin-top:8px">Daten: <a href="https://www.wikidata.org/" target="_blank" rel="noopener">Wikidata</a> (CC0), <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">Open Food Facts</a> (ODbL), Logos von Wikimedia Commons bzw. den Websites der Brauereien. Angaben im Zweifel am Etikett prüfen.</p></div>
   <div class="section-title">Papierkorb</div>
   <div class="list">${(D.trash || []).slice(0, 25).map(t => `<div class="item"><span style="font-size:22px;width:28px;text-align:center">${{ beer: '🍺', session: '🍻', rating: '⭐' }[t.kind] || '🗑'}</span><div class="grow"><h3>${esc(t.label)}</h3><div class="sub">${esc(t.by || 'Jemand')} · ${new Date(t.at).toLocaleString('de-DE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}${t.n ? ` · ${t.n} Noten` : ''}</div></div><button class="btn small" data-act="restoreTrash" data-tid="${t.tid}">Zurückholen</button></div>`).join('') || '<div class="item muted small">Leer. Gelöschte Biere, Abende und Noten landen hier 30 Tage lang – jede Person kann sie zurückholen.</div>'}</div>
@@ -595,7 +596,7 @@ function renderMehr() {
   <div class="card"><div class="btns"><a class="btn" href="/api/backup" download>Backup (JSON)</a><a class="btn" href="/api/csv?session=all&user=${encodeURIComponent(me)}" download>Alles als CSV</a></div>
   <label class="lbl" for="restore">Backup wiederherstellen</label><input class="field" id="restore" type="file" accept=".json,application/json" data-change="restore">
   <p class="tiny muted">Ersetzt alle Daten. Vorher wird auf dem Server automatisch gesichert. Alte Formate (data.json, tasting-data.json) werden übernommen.</p></div>
-  <p class="tiny muted" style="text-align:center;margin:26px 0 0">Bierstudio 2.1${DEMO ? ' · Testversion, ' + esc(DEMO.modeText()) : ''} · Namen sind keine Konten – bitte nur eigene Noten bearbeiten.</p>`;
+  <p class="tiny muted" style="text-align:center;margin:26px 0 0">Bierstudio 2.1.1${DEMO ? ' · Testversion, ' + esc(DEMO.modeText()) : ''} · Namen sind keine Konten – bitte nur eigene Noten bearbeiten.</p>`;
 }
 ACT.backups = async () => {
   try {
@@ -608,6 +609,11 @@ ACT.backups = async () => {
 ACT.backupRestore = async el => {
   if (!(await ask({ title: 'Stand wiederherstellen?', text: `Alle Daten springen auf den Stand von ${el.dataset.at} zurück – für alle Geräte. Der aktuelle Stand wird vorher gesichert.`, ok: 'Zurückspringen', danger: true }))) return;
   try { await send('backup/restore', { name: el.dataset.name }); Object.keys(drafts).forEach(k => delete drafts[k]); saveDrafts(); closeSheet(); toast('Stand wiederhergestellt ✓'); } catch (e) { toast(e.message); }
+};
+ACT.logosRetry = async el => {
+  el.disabled = true;
+  try { await send('logos/retry', {}); LS.set('bs-logo-v', Date.now()); toast('Logos werden neu gesucht …'); render(); }
+  catch (e) { toast(e.message); el.disabled = false; }
 };
 ACT.theme = el => { const v = el.dataset.v; LS.set('bs-theme', v); if (v) document.documentElement.dataset.theme = v; else delete document.documentElement.dataset.theme; render(); };
 ACT.install = async () => { if (!deferredInstall) return; deferredInstall.prompt(); await deferredInstall.userChoice; deferredInstall = null; render(); };
