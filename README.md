@@ -46,8 +46,7 @@
 
 ### TrueNAS SCALE (24.10 oder neuer)
 
-1. Ein Dataset anlegen, z. B. `tank/bierstudio`.
-2. *Apps → Discover Apps → ⋮ → Install via YAML*, Name `bierstudio`, und das hier einfügen. Den Pfad `/mnt/tank/bierstudio` anpassen:
+1. *Apps → Discover Apps → ⋮ → Install via YAML*, Name `bierstudio`, und das hier einfügen. Anpassen musst du nichts:
 
 ```yaml
 services:
@@ -57,14 +56,17 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - /mnt/tank/bierstudio:/data
+      - bierstudio-data:/data
     environment:
       TZ: Europe/Berlin
+
+volumes:
+  bierstudio-data:
 ```
 
-3. Die App unter `http://<truenas-ip>:8000` öffnen.
+2. Die App unter `http://<truenas-ip>:8000` öffnen.
 
-`chown` musst du nicht ausführen: Der Container übernimmt das Dataset selbst für einen eigenen Benutzer (UID 3100). Details, Updates und HTTPS stehen in **[docs/TRUENAS.md](docs/TRUENAS.md)**.
+TrueNAS legt den Speicher selbst an, Rechte setzt der Container (eigener Benutzer, UID 3100). Details, Updates und HTTPS stehen in **[docs/TRUENAS.md](docs/TRUENAS.md)**.
 
 ### Docker Compose
 

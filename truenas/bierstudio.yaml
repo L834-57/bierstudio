@@ -1,13 +1,15 @@
 # Bierstudio für TrueNAS SCALE 24.10+ → Apps → Discover Apps → ⋮ → „Install via YAML“, Name: bierstudio
-# Vorher ein Dataset anlegen (z. B. tank/bierstudio) und unten den Pfad anpassen. Rechte setzt der Container selbst.
+# Einfach einfügen: TrueNAS legt den Speicher (Volume „bierstudio-data“) selbst an.
 services:
   bierstudio:
     image: ghcr.io/l834-57/bierstudio:latest
     restart: unless-stopped
     ports:
-      - "8000:8000"                    # links ggf. anderen freien Port, z. B. "8420:8000"
+      - "8000:8000"                # links ggf. anderen freien Port, z. B. "8420:8000"
     volumes:
-      - /mnt/tank/bierstudio:/data     # <- Pfad zu deinem Dataset
+      - bierstudio-data:/data      # eigenes Dataset statt Volume: - /mnt/tank/bierstudio:/data
     environment:
       TZ: Europe/Berlin
-      # OFF_CONTACT: du@example.de     # optional: für Barcode-/Open-Food-Facts-Suche
+
+volumes:
+  bierstudio-data:

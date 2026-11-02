@@ -4,10 +4,7 @@ Die Anleitung gilt für TrueNAS SCALE ab 24.10 („Electric Eel“), wo Apps als
 
 ## Installation
 
-### 1. Dataset anlegen
-*Datasets → Add Dataset*, z. B. `tank/bierstudio` (Preset „Generic“). Rechte musst du nicht anpassen, das übernimmt der Container beim Start.
-
-### 2. App per YAML installieren
+### 1. App per YAML installieren
 *Apps → Discover Apps → ⋮ (oben rechts) → Install via YAML*
 
 - **Name:** `bierstudio`
@@ -21,20 +18,27 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - /mnt/tank/bierstudio:/data
+      - bierstudio-data:/data
     environment:
       TZ: Europe/Berlin
+
+volumes:
+  bierstudio-data:
 ```
 
-Anpassen musst du nur:
+*Save*: TrueNAS lädt das Image (amd64 und arm64), legt das Volume `bierstudio-data` selbst an und startet die App. Vorher musst du nichts anlegen.
+
+Optional anpassen:
 
 | Zeile | Wert |
 |---|---|
-| `- /mnt/tank/bierstudio:/data` | Pfad zu deinem Dataset (`tank` = Name deines Pools) |
-| `- "8000:8000"` | Bei Bedarf links einen anderen freien Port, z. B. `"8420:8000"` |
-| `OFF_CONTACT: …` | Optional unter `environment`, für die Barcode-Suche |
+| `- "8000:8000"` | Ist der Port belegt, links einen anderen eintragen, z. B. `"8420:8000"` |
+| `OFF_CONTACT: du@example.de` | Unter `environment` ergänzen, für die Barcode-Suche |
 
-*Save*: TrueNAS lädt das Image (amd64 und arm64) und startet die App.
+### 2. Lieber ein eigenes Dataset? (optional)
+Das Volume liegt im internen App-Speicher von TrueNAS. Willst du die Daten lieber in einem eigenen Dataset haben, etwa für Snapshots, Replikation oder SMB-Zugriff:
+1. Ein Dataset anlegen, z. B. `tank/bierstudio`. Rechte setzt der Container selbst.
+2. In der YAML `- bierstudio-data:/data` durch `- /mnt/tank/bierstudio:/data` ersetzen und den Block `volumes:` ganz unten löschen.
 
 ### 3. Öffnen
 `http://<IP-deines-TrueNAS>:8000`
@@ -42,9 +46,7 @@ Anpassen musst du nur:
 Teile den Link bzw. den QR-Code aus *Mehr → QR-Code zum Mitmachen zeigen* mit deinen Freunden.
 
 ### Alte Daten übernehmen
-Hast du noch eine `tasting-data.json` oder `data.json` aus einer früheren Version, gibt es zwei Wege:
-- vor dem ersten Start ins Dataset kopieren: Sie wird automatisch übernommen.
-- oder später in der App unter *Mehr → Backup wiederherstellen* hochladen.
+Hast du noch eine `tasting-data.json` oder `data.json` aus einer früheren Version, lade sie in der App unter *Mehr → Backup wiederherstellen* hoch. Mit eigenem Dataset geht auch: die Datei vor dem ersten Start hineinkopieren, sie wird dann automatisch übernommen.
 
 ## Update
 
@@ -54,7 +56,7 @@ Willst du eine feste Version statt `latest`, ersetze `latest` durch den Commit-H
 
 ## Getrennt von anderen Apps
 
-- eigenes Dataset
+- eigenes Volume bzw. Dataset
 - eigener Benutzer: Der Container startet kurz als root, übernimmt `/data` für UID/GID `3100` (änderbar über `PUID`/`PGID`) und läuft danach ohne Root-Rechte
 - eigenes Docker-Netzwerk: TrueNAS legt pro App automatisch eins an
 
@@ -93,7 +95,9 @@ Ohne HTTPS funktioniert alles außer Offline-Modus, App-Installation unter Andro
 
 Die Logs findest du unter *Apps → bierstudio → Logs*.
 
-## Daten im Dataset
+## Daten
+
+Beim Volume liegen die Daten im App-Speicher von TrueNAS (`/mnt/.ix-apps/docker/volumes/bierstudio-data`). Beim eigenen Dataset liegen sie dort. Inhalt:
 
 ```
 bierstudio.json   aktuelle Daten
@@ -102,4 +106,4 @@ logos/            zwischengespeicherte Brauerei-Logos
 .app/             nur bei der Variante ohne Image: heruntergeladene Versionen
 ```
 
-Für die Datensicherung reicht ein normaler TrueNAS-Snapshot bzw. eine Replikation des Datasets.
+**Sicherung:** Beim eigenen Dataset reicht ein normaler Snapshot oder eine Replikation. Beim Volume lädst du regelmäßig in der App unter *Mehr → Backup (JSON)* eine Sicherung herunter. **Achtung:** Wer die App in TrueNAS löscht und dabei die Volumes mitlöscht, verliert die Daten. Vorher also ein Backup herunterladen.
