@@ -1,0 +1,69 @@
+# Bierstudio für TrueNAS SCALE 24.10+ (Apps → Discover Apps → ⋮ → „Install via YAML“, Name: bierstudio)
+#
+# ALTERNATIVE zu bierstudio.yaml – nur nötig, wenn dein Server ghcr.io nicht erreicht.
+# Nutzt das offizielle Python-Image und lädt beim ersten Start die angegebene Bierstudio-Version von GitHub.
+# Sie wird in /data/.app zwischengespeichert, spätere Starts brauchen kein Internet.
+# BIERSTUDIO_VERSION: Release-Tag (z. B. v2.1.0) oder Commit-Hash. Update = Wert ändern, App neu starten.
+#
+# Vorher nur: Dataset anlegen (z. B. tank/bierstudio) und unten den Pfad anpassen. Rechte setzt der Container selbst.
+services:
+  bierstudio:
+    image: python:3.13-alpine
+    restart: unless-stopped
+    environment:
+      BIERSTUDIO_VERSION: "4c864841d71a8e49571bf9f676471d5919e9c54e"   # = Version 2.1.0
+      BIERSTUDIO_REPO: "L834-57/bierstudio"
+      PUID: "3100"          # eigener Benutzer, getrennt von anderen Apps
+      PGID: "3100"
+      PORT: "8000"
+      DATA_DIR: /data
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+      # OFF_CONTACT: du@example.de   # optional: für Barcode-/Open-Food-Facts-Suche
+    command:
+      - python
+      - -c
+      - |
+        import io, os, sys, tarfile, urllib.request, runpy
+        ver, repo = os.environ['BIERSTUDIO_VERSION'], os.environ['BIERSTUDIO_REPO']
+        cache = f'/data/.app/bierstudio-{ver}.tar.gz'
+        os.makedirs('/data/.app', exist_ok=True)
+        if not os.path.exists(cache):
+            print(f'Lade Bierstudio {ver} von GitHub ...', flush=True)
+            with urllib.request.urlopen(f'https://github.com/{repo}/archive/{ver}.tar.gz', timeout=60) as r:
+                data = r.read()
+            open(cache + '.part', 'wb').write(data); os.replace(cache + '.part', cache)
+        with tarfile.open(cache) as t:
+            t.extractall('/tmp/src', filter='data')
+        app = next(os.path.join('/tmp/src', d, 'app') for d in os.listdir('/tmp/src'))
+        sys.path.insert(0, app); sys.argv = [app + '/server.py']
+        runpy.run_path(app + '/server.py', run_name='__main__')
+    ports:
+      - "8000:8000"         # links ggf. anderen freien Port wählen, z. B. "8420:8000"
+    volumes:
+      - /mnt/tank/bierstudio:/data   # <- Pfad zu deinem Dataset
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    cap_add:                # nur zum Übernehmen von /data beim Start, danach läuft alles als PUID
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETUID
+      - SETGID
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - bierstudio
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8000/healthz"]
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
+
+networks:
+  bierstudio:
+    name: bierstudio

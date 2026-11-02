@@ -1,10 +1,6 @@
 # Bierstudio auf TrueNAS SCALE
 
-Getestet ist die Anleitung für TrueNAS SCALE ab 24.10 („Electric Eel“), wo Apps als Docker-Compose laufen. Bierstudio läuft dabei **komplett getrennt** von deinen anderen Apps:
-- eigenes Dataset
-- eigener Benutzer (UID/GID `3100` statt des gemeinsamen `apps`-Benutzers)
-- eigenes Docker-Netzwerk
-- schreibgeschütztes Dateisystem und nur die nötigsten Rechte
+Die Anleitung gilt für TrueNAS SCALE ab 24.10 („Electric Eel“), wo Apps als Docker-Compose laufen. Bierstudio läuft dabei getrennt von deinen anderen Apps (eigenes Dataset, eigener Benutzer, eigenes Netzwerk).
 
 ## Installation
 
@@ -15,17 +11,30 @@ Getestet ist die Anleitung für TrueNAS SCALE ab 24.10 („Electric Eel“), wo 
 *Apps → Discover Apps → ⋮ (oben rechts) → Install via YAML*
 
 - **Name:** `bierstudio`
-- **Inhalt:** [`truenas/bierstudio.yaml`](../truenas/bierstudio.yaml) einfügen
+- **Inhalt:** [`truenas/bierstudio.yaml`](../truenas/bierstudio.yaml)
 
-Anpassen musst du darin nur:
+```yaml
+services:
+  bierstudio:
+    image: ghcr.io/l834-57/bierstudio:latest
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - /mnt/tank/bierstudio:/data
+    environment:
+      TZ: Europe/Berlin
+```
+
+Anpassen musst du nur:
 
 | Zeile | Wert |
 |---|---|
 | `- /mnt/tank/bierstudio:/data` | Pfad zu deinem Dataset (`tank` = Name deines Pools) |
 | `- "8000:8000"` | Bei Bedarf links einen anderen freien Port, z. B. `"8420:8000"` |
-| `# OFF_CONTACT: …` | Optional, für die Barcode-Suche (Raute entfernen, E-Mail eintragen) |
+| `OFF_CONTACT: …` | Optional unter `environment`, für die Barcode-Suche |
 
-*Save* → Die App startet. Beim **ersten Start** lädt sie die eingestellte Version von GitHub, das dauert ein paar Sekunden. Danach liegt sie im Dataset unter `.app/` und startet auch ohne Internet.
+*Save*: TrueNAS lädt das Image (amd64 und arm64) und startet die App.
 
 ### 3. Öffnen
 `http://<IP-deines-TrueNAS>:8000`
@@ -39,14 +48,21 @@ Hast du noch eine `tasting-data.json` oder `data.json` aus einer früheren Versi
 
 ## Update
 
-1. In der App-Konfiguration (*Apps → bierstudio → Edit*) `BIERSTUDIO_VERSION` auf die neue Version setzen, z. B. `v2.2.0`. Die verfügbaren Versionen stehen unter [Releases](https://github.com/L834-57/bierstudio/releases).
-2. *Save*. Die App startet neu und lädt die neue Version.
+*Apps → bierstudio →* **Update** (bzw. *Edit → Save*, um das neueste `latest`-Image zu ziehen). Deine Daten bleiben unverändert.
 
-Deine Daten bleiben dabei unverändert. Alte Versionen unter `.app/` kannst du löschen.
+Willst du eine feste Version statt `latest`, ersetze `latest` durch den Commit-Hash eines Builds. Diese Tags erzeugt die GitHub-Action automatisch.
 
-## Variante mit fertigem Image
+## Getrennt von anderen Apps
 
-Bei jedem Push baut eine GitHub-Action das Image `ghcr.io/l834-57/bierstudio:latest`. Damit TrueNAS es ohne Anmeldung laden kann, stellt der Repo-Besitzer einmalig unter *GitHub → Packages → bierstudio → Package settings → Change visibility* die Sichtbarkeit auf **Public**. Danach funktioniert [`truenas/bierstudio-image.yaml`](../truenas/bierstudio-image.yaml).
+- eigenes Dataset
+- eigener Benutzer: Der Container startet kurz als root, übernimmt `/data` für UID/GID `3100` (änderbar über `PUID`/`PGID`) und läuft danach ohne Root-Rechte
+- eigenes Docker-Netzwerk: TrueNAS legt pro App automatisch eins an
+
+Optional härtest du die App weiter mit `read_only: true`, `tmpfs: [/tmp]`, `cap_drop: [ALL]` und `cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETUID, SETGID]`. Ein Beispiel dafür ist [`bierstudio-ohne-image.yaml`](../truenas/bierstudio-ohne-image.yaml).
+
+## Variante ohne Image-Registry
+
+Erreicht dein Server `ghcr.io` nicht, nimm [`truenas/bierstudio-ohne-image.yaml`](../truenas/bierstudio-ohne-image.yaml). Sie nutzt das offizielle Python-Image und lädt die App beim ersten Start von GitHub.
 
 ## HTTPS
 
@@ -69,7 +85,7 @@ Ohne HTTPS funktioniert alles außer Offline-Modus, App-Installation unter Andro
 
 | Problem | Lösung |
 |---|---|
-| App startet nicht, im Log steht `urlopen error` | Beim ersten Start braucht der Container Internet, um die Version von GitHub zu laden. DNS und Gateway von TrueNAS prüfen. |
+| Image lässt sich nicht laden / `urlopen error` | Der Server braucht beim Installieren Internet (ghcr.io bzw. github.com). DNS und Gateway von TrueNAS prüfen. |
 | `Address already in use` / Port belegt | Links einen anderen Port eintragen, z. B. `"8420:8000"` |
 | Keine Logos, „Wikidata nicht erreichbar“ | Der Container braucht ausgehendes Internet zu `www.wikidata.org`, `commons.wikimedia.org` und `upload.wikimedia.org`. Ohne Internet bleiben die Anfangsbuchstaben. |
 | „Offline“ oben in der App | Das Handy erreicht den Server nicht (anderes WLAN, VPN aus). Bewertungen werden gespeichert und später übertragen. |
@@ -83,7 +99,7 @@ Die Logs findest du unter *Apps → bierstudio → Logs*.
 bierstudio.json   aktuelle Daten
 backups/          automatische Sicherungen (zum Zurückspringen in der App)
 logos/            zwischengespeicherte Brauerei-Logos
-.app/             heruntergeladene Bierstudio-Versionen
+.app/             nur bei der Variante ohne Image: heruntergeladene Versionen
 ```
 
 Für die Datensicherung reicht ein normaler TrueNAS-Snapshot bzw. eine Replikation des Datasets.
